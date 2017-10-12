@@ -48,9 +48,11 @@ public final class Dispatcher {
   private final Deque<AsyncCall> readyAsyncCalls = new ArrayDeque<>();
 
   /** Running asynchronous calls. Includes canceled calls that haven't finished yet. */
+  //异步任务的双端队列
   private final Deque<AsyncCall> runningAsyncCalls = new ArrayDeque<>();
 
   /** Running synchronous calls. Includes canceled calls that haven't finished yet. */
+  //同步任务的双端队列
   private final Deque<RealCall> runningSyncCalls = new ArrayDeque<>();
 
   public Dispatcher(ExecutorService executorService) {

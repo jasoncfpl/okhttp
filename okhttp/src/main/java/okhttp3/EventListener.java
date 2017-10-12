@@ -15,6 +15,8 @@
  */
 package okhttp3;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -56,6 +58,7 @@ import javax.annotation.Nullable;
  * Any IO - writing to files or network should be done asynchronously.
  */
 public abstract class EventListener {
+  private static final String TAG = "EventListener";
   public static final EventListener NONE = new EventListener() {
   };
 
@@ -76,6 +79,7 @@ public abstract class EventListener {
    * #callEnd}/{@link #callFailed} pair.
    */
   public void callStart(Call call) {
+      Log.i(TAG, "callStart: ");
   }
 
   /**
@@ -88,6 +92,7 @@ public abstract class EventListener {
    * invoked. See {@link ConnectionPool}.
    */
   public void dnsStart(Call call, String domainName) {
+      Log.i(TAG, "dnsStart: ");
   }
 
   /**
@@ -281,6 +286,7 @@ public abstract class EventListener {
    * <p>This method is always invoked after {@link #callStart(Call)}.
    */
   public void callFailed(Call call, IOException ioe) {
+      Log.i(TAG, "callFailed: ");
   }
 
   /**

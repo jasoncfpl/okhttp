@@ -73,6 +73,7 @@ final class RealCall implements Call {
     captureCallStackTrace();
     eventListener.callStart(this);
     try {
+      //把这次请求加入到分发器里
       client.dispatcher().executed(this);
       Response result = getResponseWithInterceptorChain();
       if (result == null) throw new IOException("Canceled");
@@ -92,7 +93,10 @@ final class RealCall implements Call {
 
   @Override public void enqueue(Callback responseCallback) {
     synchronized (this) {
-      if (executed) throw new IllegalStateException("Already Executed");
+      //如果已经执行过就不在执行
+      if (executed) {
+        throw new IllegalStateException("Already Executed");
+      }
       executed = true;
     }
     captureCallStackTrace();
@@ -141,14 +145,20 @@ final class RealCall implements Call {
       return RealCall.this;
     }
 
+    /**
+     * 真正执行网络请求的方法
+     */
     @Override protected void execute() {
       boolean signalledCallback = false;
       try {
         Response response = getResponseWithInterceptorChain();
+
         if (retryAndFollowUpInterceptor.isCanceled()) {
+          //取消call调用onFailure回调
           signalledCallback = true;
           responseCallback.onFailure(RealCall.this, new IOException("Canceled"));
         } else {
+          //请求成功，回调onResponse
           signalledCallback = true;
           responseCallback.onResponse(RealCall.this, response);
         }

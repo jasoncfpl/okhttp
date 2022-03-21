@@ -442,11 +442,15 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
   }
 
   public static final class Builder {
+    //调度器/分发器 -分发网络请求
     Dispatcher dispatcher;
     @Nullable Proxy proxy;
+    //协议版本
     List<Protocol> protocols;
     List<ConnectionSpec> connectionSpecs;
+    //拦截器
     final List<Interceptor> interceptors = new ArrayList<>();
+    //网络拦截器
     final List<Interceptor> networkInterceptors = new ArrayList<>();
     EventListener.Factory eventListenerFactory;
     ProxySelector proxySelector;

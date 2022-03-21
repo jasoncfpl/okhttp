@@ -22,9 +22,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * 拦截器 demo
+ */
 public final class LoggingInterceptors {
   private static final Logger logger = Logger.getLogger(LoggingInterceptors.class.getName());
   private final OkHttpClient client = new OkHttpClient.Builder()
+          //添加拦截器
       .addInterceptor(new LoggingInterceptor())
       .build();
 

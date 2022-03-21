@@ -38,6 +38,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
   private final StreamAllocation streamAllocation;
   private final HttpCodec httpCodec;
   private final RealConnection connection;
+  //用于记录拦截器列表中当前执行的拦截器的 index 下标
   private final int index;
   private final Request request;
   private final Call call;
@@ -50,7 +51,9 @@ public final class RealInterceptorChain implements Interceptor.Chain {
   public RealInterceptorChain(List<Interceptor> interceptors, StreamAllocation streamAllocation,
       HttpCodec httpCodec, RealConnection connection, int index, Request request, Call call,
       EventListener eventListener, int connectTimeout, int readTimeout, int writeTimeout) {
+    //所有拦截器
     this.interceptors = interceptors;
+    //连接
     this.connection = connection;
     this.streamAllocation = streamAllocation;
     this.httpCodec = httpCodec;
@@ -143,6 +146,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
     RealInterceptorChain next = new RealInterceptorChain(interceptors, streamAllocation, httpCodec,
         connection, index + 1, request, call, eventListener, connectTimeout, readTimeout,
         writeTimeout);
+    //拦截器列表中的最后一个拦截器，真正开始执行网络请求，也就是CallServerInterceptor
     Interceptor interceptor = interceptors.get(index);
     Response response = interceptor.intercept(next);
 

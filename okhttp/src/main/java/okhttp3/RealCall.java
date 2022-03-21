@@ -66,6 +66,7 @@ final class RealCall implements Call {
   }
 
   @Override public Response execute() throws IOException {
+    //是否已经执行过
     synchronized (this) {
       if (executed) throw new IllegalStateException("Already Executed");
       executed = true;
@@ -73,7 +74,7 @@ final class RealCall implements Call {
     captureCallStackTrace();
     eventListener.callStart(this);
     try {
-      //把这次请求加入到分发器里
+      //把这次请求加入到 任务分发器的同步请求队列中
       client.dispatcher().executed(this);
       Response result = getResponseWithInterceptorChain();
       if (result == null) throw new IOException("Canceled");
@@ -192,8 +193,10 @@ final class RealCall implements Call {
 
   Response getResponseWithInterceptorChain() throws IOException {
     // Build a full stack of interceptors.
+    //TODO 搞清楚每个拦截器的作用
     List<Interceptor> interceptors = new ArrayList<>();
     interceptors.addAll(client.interceptors());
+    //失败重试和重定向拦截器
     interceptors.add(retryAndFollowUpInterceptor);
     interceptors.add(new BridgeInterceptor(client.cookieJar()));
     interceptors.add(new CacheInterceptor(client.internalCache()));
@@ -201,6 +204,7 @@ final class RealCall implements Call {
     if (!forWebSocket) {
       interceptors.addAll(client.networkInterceptors());
     }
+    //最后一个拦截器-真正执行请求的拦截器
     interceptors.add(new CallServerInterceptor(forWebSocket));
 
     Interceptor.Chain chain = new RealInterceptorChain(interceptors, null, null, null, 0,

@@ -122,23 +122,29 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       Response response;
       boolean releaseConnection = true;
       try {
+        //调用下一个拦截器
         response = realChain.proceed(request, streamAllocation, null, null);
         releaseConnection = false;
       } catch (RouteException e) {
         // The attempt to connect via a route failed. The request will not have been sent.
+        //判断 RouteException  否可以重连
         if (!recover(e.getLastConnectException(), false, request)) {
           throw e.getLastConnectException();
         }
         releaseConnection = false;
+        //继续while循环，进行网络请求
         continue;
       } catch (IOException e) {
+        //判断 IOException 否可以重连
         // An attempt to communicate with a server failed. The request may have been sent.
         boolean requestSendStarted = !(e instanceof ConnectionShutdownException);
         if (!recover(e, requestSendStarted, request)) throw e;
         releaseConnection = false;
+        //继续while循环，进行网络请求
         continue;
       } finally {
         // We're throwing an unchecked exception. Release any resources.
+        //释放资源
         if (releaseConnection) {
           streamAllocation.streamFailed(null);
           streamAllocation.release();
@@ -164,7 +170,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       }
 
       closeQuietly(response.body());
-
+      //超过次数释放，并抛出异常
       if (++followUpCount > MAX_FOLLOW_UPS) {
         streamAllocation.release();
         throw new ProtocolException("Too many follow-up requests: " + followUpCount);
@@ -212,7 +218,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
    */
   private boolean recover(IOException e, boolean requestSendStarted, Request userRequest) {
     streamAllocation.streamFailed(e);
-
+    //是否打开了重试功能-默认是true
     // The application layer has forbidden retries.
     if (!client.retryOnConnectionFailure()) return false;
 
@@ -220,6 +226,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
     if (requestSendStarted && userRequest.body() instanceof UnrepeatableRequestBody) return false;
 
     // This exception is fatal.
+    //是否是致命异常
     if (!isRecoverable(e, requestSendStarted)) return false;
 
     // No more routes to attempt.
@@ -229,6 +236,12 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
     return true;
   }
 
+  /**
+   * 检测是否是致命异常
+   * @param e
+   * @param requestSendStarted
+   * @return
+   */
   private boolean isRecoverable(IOException e, boolean requestSendStarted) {
     // If there was a protocol problem, don't recover.
     if (e instanceof ProtocolException) {

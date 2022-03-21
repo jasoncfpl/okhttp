@@ -160,6 +160,7 @@ public final class Request {
     /**
      * Sets the header named {@code name} to {@code value}. If this request already has any headers
      * with that name, they are all replaced.
+     * 相同name 的 header 会替换
      */
     public Builder header(String name, String value) {
       headers.set(name, value);

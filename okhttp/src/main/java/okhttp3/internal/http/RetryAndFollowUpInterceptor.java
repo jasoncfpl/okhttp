@@ -159,7 +159,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
                     .build())
             .build();
       }
-
+      //根据返回码，判断网络请求是否成功
       Request followUp = followUpRequest(response);
 
       if (followUp == null) {
@@ -170,7 +170,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       }
 
       closeQuietly(response.body());
-      //超过次数释放，并抛出异常
+      //是否超过最大重试次数，如果超过了释放资源并抛出异常
       if (++followUpCount > MAX_FOLLOW_UPS) {
         streamAllocation.release();
         throw new ProtocolException("Too many follow-up requests: " + followUpCount);

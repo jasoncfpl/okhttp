@@ -52,12 +52,15 @@ public final class BridgeInterceptor implements Interceptor {
     if (body != null) {
       MediaType contentType = body.contentType();
       if (contentType != null) {
+        //报文主体内容类型
         requestBuilder.header("Content-Type", contentType.toString());
       }
 
       long contentLength = body.contentLength();
       if (contentLength != -1) {
+        //报文内容大小
         requestBuilder.header("Content-Length", Long.toString(contentLength));
+        //传输报文主体时采用的编码方式
         requestBuilder.removeHeader("Transfer-Encoding");
       } else {
         requestBuilder.header("Transfer-Encoding", "chunked");
@@ -66,15 +69,18 @@ public final class BridgeInterceptor implements Interceptor {
     }
 
     if (userRequest.header("Host") == null) {
+      //请求资源所在服务器，段在 HTTP/1.1 规范内是唯一一个必须被包含在请 求内的首部字段
       requestBuilder.header("Host", hostHeader(userRequest.url(), false));
     }
 
     if (userRequest.header("Connection") == null) {
+      //连接状态是否是持久连接
       requestBuilder.header("Connection", "Keep-Alive");
     }
 
     // If we add an "Accept-Encoding: gzip" header field we're responsible for also decompressing
     // the transfer stream.
+    //添加了Gzip的编解码
     boolean transparentGzip = false;
     if (userRequest.header("Accept-Encoding") == null && userRequest.header("Range") == null) {
       transparentGzip = true;
@@ -83,37 +89,44 @@ public final class BridgeInterceptor implements Interceptor {
 
     List<Cookie> cookies = cookieJar.loadForRequest(userRequest.url());
     if (!cookies.isEmpty()) {
+      //获取本地存储的 cookie，然后设置到请求头的Cookie中去。
       requestBuilder.header("Cookie", cookieHeader(cookies));
     }
 
     if (userRequest.header("User-Agent") == null) {
+      //客户端信息
       requestBuilder.header("User-Agent", Version.userAgent());
     }
 
     Response networkResponse = chain.proceed(requestBuilder.build());
-
+    //存储服务端返回的 cookie
     HttpHeaders.receiveHeaders(cookieJar, userRequest.url(), networkResponse.headers());
 
-    Response.Builder responseBuilder = networkResponse.newBuilder()
+    Response.Builder             = networkResponse.newBuilder()
         .request(userRequest);
-
+    //返回数据是否需要 gzip 解压
     if (transparentGzip
         && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding"))
         && HttpHeaders.hasBody(networkResponse)) {
       GzipSource responseBody = new GzipSource(networkResponse.body().source());
       Headers strippedHeaders = networkResponse.headers().newBuilder()
-          .removeAll("Content-Encoding")
+          .removeAll("Content-Encoding")//内容编码
           .removeAll("Content-Length")
           .build();
       responseBuilder.headers(strippedHeaders);
       String contentType = networkResponse.header("Content-Type");
       responseBuilder.body(new RealResponseBody(contentType, -1L, Okio.buffer(responseBody)));
     }
-
+    //返回数据
     return responseBuilder.build();
   }
 
   /** Returns a 'Cookie' HTTP request header with all cookies, like {@code a=b; c=d}. */
+  /**
+   * 处理 header
+   * @param cookies
+   * @return
+   */
   private String cookieHeader(List<Cookie> cookies) {
     StringBuilder cookieHeader = new StringBuilder();
     for (int i = 0, size = cookies.size(); i < size; i++) {

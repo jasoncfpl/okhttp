@@ -102,7 +102,7 @@ public final class BridgeInterceptor implements Interceptor {
     //存储服务端返回的 cookie
     HttpHeaders.receiveHeaders(cookieJar, userRequest.url(), networkResponse.headers());
 
-    Response.Builder             = networkResponse.newBuilder()
+    Response.Builder responseBuilder = networkResponse.newBuilder()
         .request(userRequest);
     //返回数据是否需要 gzip 解压
     if (transparentGzip
@@ -110,7 +110,7 @@ public final class BridgeInterceptor implements Interceptor {
         && HttpHeaders.hasBody(networkResponse)) {
       GzipSource responseBody = new GzipSource(networkResponse.body().source());
       Headers strippedHeaders = networkResponse.headers().newBuilder()
-          .removeAll("Content-Encoding")//内容编码
+          .removeAll("Content-Encoding")//对实体内容进行压缩编码，目的是优化传输
           .removeAll("Content-Length")
           .build();
       responseBuilder.headers(strippedHeaders);

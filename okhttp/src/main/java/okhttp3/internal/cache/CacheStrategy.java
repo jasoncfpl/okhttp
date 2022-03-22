@@ -142,6 +142,7 @@ public final class CacheStrategy {
       this.request = request;
       this.cacheResponse = cacheResponse;
 
+      //是否有本地缓存
       if (cacheResponse != null) {
         this.sentRequestMillis = cacheResponse.sentRequestAtMillis();
         this.receivedResponseMillis = cacheResponse.receivedResponseAtMillis();
@@ -170,6 +171,7 @@ public final class CacheStrategy {
      * Returns a strategy to satisfy {@code request} using the a cached response {@code response}.
      */
     public CacheStrategy get() {
+      //获取缓存策略
       CacheStrategy candidate = getCandidate();
 
       if (candidate.networkRequest != null && request.cacheControl().onlyIfCached()) {

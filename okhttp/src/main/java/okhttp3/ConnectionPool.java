@@ -123,6 +123,7 @@ public final class ConnectionPool {
     assert (Thread.holdsLock(this));
     for (RealConnection connection : connections) {
       if (connection.isEligible(address, route)) {
+        //调用acquire 设置 streamAllocation的 connection
         streamAllocation.acquire(connection, true);
         return connection;
       }

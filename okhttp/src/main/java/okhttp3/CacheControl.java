@@ -150,11 +150,16 @@ public final class CacheControl {
    * headers if they are present.
    */
   public static CacheControl parse(Headers headers) {
+    //需要使用对比缓存来验证缓存数据。
     boolean noCache = false;
+    //所有内容都不会缓存；强制缓存，对比缓存都不会触发。
     boolean noStore = false;
+    //缓存的内容将在 xxx 秒后失效
     int maxAgeSeconds = -1;
     int sMaxAgeSeconds = -1;
+    //客户端可以缓存
     boolean isPrivate = false;
+    //客户端和代理服务器都可缓存。
     boolean isPublic = false;
     boolean mustRevalidate = false;
     int maxStaleSeconds = -1;

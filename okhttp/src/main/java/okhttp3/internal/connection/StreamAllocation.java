@@ -110,8 +110,10 @@ public final class StreamAllocation {
     boolean connectionRetryEnabled = client.retryOnConnectionFailure();
 
     try {
+      //获取一个可用的 connection
       RealConnection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
           writeTimeout, connectionRetryEnabled, doExtensiveHealthChecks);
+      // 获取 HttpCodec用于编码 request 和解码 response
       HttpCodec resultCodec = resultConnection.newCodec(client, chain, this);
 
       synchronized (connectionPool) {
@@ -131,6 +133,7 @@ public final class StreamAllocation {
       int writeTimeout, boolean connectionRetryEnabled, boolean doExtensiveHealthChecks)
       throws IOException {
     while (true) {
+      //获取可用的 connection 连接
       RealConnection candidate = findConnection(connectTimeout, readTimeout, writeTimeout,
           connectionRetryEnabled);
 
@@ -184,6 +187,7 @@ public final class StreamAllocation {
 
       if (result == null) {
         // Attempt to get a connection from the pool.
+        //从connectionPool获取可用的连接 并赋值给 connection 变量
         Internal.instance.get(connectionPool, address, this, null);
         if (connection != null) {
           foundPooledConnection = true;
@@ -201,6 +205,7 @@ public final class StreamAllocation {
     if (foundPooledConnection) {
       eventListener.connectionAcquired(call, result);
     }
+    //返回连接
     if (result != null) {
       // If we found an already-allocated or pooled connection, we're done.
       return result;
@@ -222,6 +227,7 @@ public final class StreamAllocation {
         List<Route> routes = routeSelection.getAll();
         for (int i = 0, size = routes.size(); i < size; i++) {
           Route route = routes.get(i);
+          //从连接池重获取一个连接并复制给 connection变量
           Internal.instance.get(connectionPool, address, this, route);
           if (connection != null) {
             foundPooledConnection = true;
@@ -241,6 +247,7 @@ public final class StreamAllocation {
         // for an asynchronous cancel() to interrupt the handshake we're about to do.
         route = selectedRoute;
         refusedStreamCount = 0;
+        //如果以上步骤都没有没找到，那就新建一个连接。
         result = new RealConnection(connectionPool, selectedRoute);
         acquire(result, false);
       }
@@ -253,6 +260,7 @@ public final class StreamAllocation {
     }
 
     // Do TCP + TLS handshakes. This is a blocking operation.
+    //建立连接
     result.connect(
         connectTimeout, readTimeout, writeTimeout, connectionRetryEnabled, call, eventListener);
     routeDatabase().connected(result.route());

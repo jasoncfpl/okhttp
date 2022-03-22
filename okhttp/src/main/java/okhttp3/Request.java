@@ -77,6 +77,16 @@ public final class Request {
   /**
    * Returns the cache control directives for this response. This is never null, even if this
    * response contains no {@code Cache-Control} header.
+   *
+   * CacheControl
+   * private	表明响应只能被单个用户缓存，不能作为共享缓存（即代理服务器不能缓存它）
+   * public	表明响应可以被任何对象（包括：发送请求的客户端，代理服务器，等等）缓存
+   * no-cache	在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证
+   * no-store	缓存不应存储有关客户端请求或服务器响应的任何内容
+   * max-age=	设置缓存存储的最大周期，超过这个时间缓存被认为过期
+   * s-maxage=	覆盖max-age或者Expires头，但是仅适用于共享缓存
+   * max-stale[=]	表明客户端愿意接收一个已经过期的资源。可以设置一个可选的秒数，表示响应不能已经过时超过该给定的时间
+   * min-fresh=	表示客户端希望获取一个能在指定的秒数内保持其最新状态的响应
    */
   public CacheControl cacheControl() {
     CacheControl result = cacheControl;

@@ -80,7 +80,7 @@ public final class BridgeInterceptor implements Interceptor {
 
     // If we add an "Accept-Encoding: gzip" header field we're responsible for also decompressing
     // the transfer stream.
-    //添加了Gzip的编解码
+    //okhttp 默认添加添加了Gzip 压缩
     boolean transparentGzip = false;
     if (userRequest.header("Accept-Encoding") == null && userRequest.header("Range") == null) {
       transparentGzip = true;

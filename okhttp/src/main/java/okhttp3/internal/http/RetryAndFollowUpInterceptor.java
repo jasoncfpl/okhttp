@@ -108,11 +108,14 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
     Call call = realChain.call();
     EventListener eventListener = realChain.eventListener();
 
+    //创建 StreamAllocation 对象
     streamAllocation = new StreamAllocation(client.connectionPool(), createAddress(request.url()),
         call, eventListener, callStackTrace);
 
     int followUpCount = 0;
     Response priorResponse = null;
+
+    //死循环实现网络重连机制
     while (true) {
       if (canceled) {
         streamAllocation.release();
@@ -124,6 +127,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       try {
         //调用下一个拦截器
         response = realChain.proceed(request, streamAllocation, null, null);
+        //可以重新连接，那么就不要释放连接
         releaseConnection = false;
       } catch (RouteException e) {
         // The attempt to connect via a route failed. The request will not have been sent.

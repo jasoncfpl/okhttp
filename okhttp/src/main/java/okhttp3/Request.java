@@ -26,11 +26,11 @@ import okhttp3.internal.http.HttpMethod;
  * immutable.
  */
 public final class Request {
-  final HttpUrl url;
-  final String method;
-  final Headers headers;
-  final @Nullable RequestBody body;
-  final Object tag;
+  final HttpUrl url; //请求的url
+  final String method; //请求方法，默认为GET
+  final Headers headers; //请求头
+  final @Nullable RequestBody body; //请求体
+  final Object tag; //请求标签
 
   private volatile CacheControl cacheControl; // Lazily initialized.
 

@@ -33,6 +33,8 @@ import javax.annotation.Nullable;
  * </ul>
  *
  * <p>Each route is a specific selection of these options.
+ *
+ *  对Address 的封装
  */
 public final class Route {
   final Address address;

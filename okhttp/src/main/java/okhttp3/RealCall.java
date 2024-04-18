@@ -32,7 +32,7 @@ import static okhttp3.internal.platform.Platform.INFO;
 
 final class RealCall implements Call {
   final OkHttpClient client;
-  final RetryAndFollowUpInterceptor retryAndFollowUpInterceptor;
+  final RetryAndFollowUpInterceptor retryAndFollowUpInterceptor; //失败重试和重定向拦截器
 
   /**
    * There is a cycle between the {@link Call} and {@link EventListener} that makes this awkward.
@@ -41,11 +41,11 @@ final class RealCall implements Call {
   private EventListener eventListener;
 
   /** The application's original request unadulterated by redirects or auth headers. */
-  final Request originalRequest;
+  final Request originalRequest; //原始请求
   final boolean forWebSocket;
 
   // Guarded by this.
-  private boolean executed;
+  private boolean executed; //是否已执行，同步锁，防止重复执行
 
   private RealCall(OkHttpClient client, Request originalRequest, boolean forWebSocket) {
     this.client = client;
@@ -71,6 +71,7 @@ final class RealCall implements Call {
       if (executed) throw new IllegalStateException("Already Executed");
       executed = true;
     }
+    //打印堆栈信息
     captureCallStackTrace();
     eventListener.callStart(this);
     try {
@@ -196,15 +197,18 @@ final class RealCall implements Call {
     //TODO 搞清楚每个拦截器的作用
     List<Interceptor> interceptors = new ArrayList<>();
     interceptors.addAll(client.interceptors());
-    //失败重试和重定向拦截器
+    //失败重试和重定向拦截器-网络请求失败时进行重定向及服务器返回当前请求需要进行重定向的拦截器
     interceptors.add(retryAndFollowUpInterceptor);
+    //桥连接器，主要时进行一些请求前的一些操作，能将我们的请求设置成服务器能识别的请求，比如设置一系列头部信息，设置请求内容的长度，编码，gzip压缩，cookie，AccessToken等
     interceptors.add(new BridgeInterceptor(client.cookieJar()));
+    //缓存拦截器，缓存请求和响应，比如如果从连接处能找到可复用的连接，就不要再创建新的连接
     interceptors.add(new CacheInterceptor(client.internalCache()));
+    //连接拦截器，为当前请求找到一个合适的连接，比如从连接处可以找到能复用的连接，就不要创建新的连接
     interceptors.add(new ConnectInterceptor(client));
     if (!forWebSocket) {
       interceptors.addAll(client.networkInterceptors());
     }
-    //最后一个拦截器-真正执行请求的拦截器
+    //最后一个拦截器-真正执行请求的拦截器-连接服务器拦截器，服务向服务器发送真正的请求，接受服务器的响应。
     interceptors.add(new CallServerInterceptor(forWebSocket));
 
     Interceptor.Chain chain = new RealInterceptorChain(interceptors, null, null, null, 0,

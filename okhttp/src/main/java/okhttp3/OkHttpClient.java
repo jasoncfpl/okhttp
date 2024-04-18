@@ -123,6 +123,7 @@ import static okhttp3.internal.Util.checkDuration;
  * remain idle.
  */
 public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory {
+  //默认支持的协议
   static final List<Protocol> DEFAULT_PROTOCOLS = Util.immutableList(
       Protocol.HTTP_2, Protocol.HTTP_1_1);
 
@@ -194,13 +195,13 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     };
   }
 
-  final Dispatcher dispatcher;
-  final @Nullable Proxy proxy;
-  final List<Protocol> protocols;
+  final Dispatcher dispatcher;//网络请求分发起
+  final @Nullable Proxy proxy;//代理
+  final List<Protocol> protocols;//支持的Http协议版本，即HTTP/1.1、HTTP/2等
   final List<ConnectionSpec> connectionSpecs;
-  final List<Interceptor> interceptors;
-  final List<Interceptor> networkInterceptors;
-  final EventListener.Factory eventListenerFactory;
+  final List<Interceptor> interceptors; //拦截器
+  final List<Interceptor> networkInterceptors;//用户自定义的网络拦截器
+  final EventListener.Factory eventListenerFactory; //Call的生命周期监听器
   final ProxySelector proxySelector;
   final CookieJar cookieJar;
   final @Nullable Cache cache;
@@ -212,14 +213,14 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
   final CertificatePinner certificatePinner;
   final Authenticator proxyAuthenticator;
   final Authenticator authenticator;
-  final ConnectionPool connectionPool;
+  final ConnectionPool connectionPool;//实例化连接池
   final Dns dns;
   final boolean followSslRedirects;
   final boolean followRedirects;
   final boolean retryOnConnectionFailure;
-  final int connectTimeout;
-  final int readTimeout;
-  final int writeTimeout;
+  final int connectTimeout; //连接超时时间
+  final int readTimeout;//读取超时，默认10秒
+  final int writeTimeout;//写入超时，默认10秒
   final int pingInterval;
 
   public OkHttpClient() {
@@ -445,7 +446,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     //调度器/分发器 -分发网络请求
     Dispatcher dispatcher;
     @Nullable Proxy proxy;
-    //协议版本
+    //协议版本-设置支持的连接，默认是使用SNI和ALPN等扩展的现代TLS连接和未加密、未认证的http连接
     List<Protocol> protocols;
     List<ConnectionSpec> connectionSpecs;
     //拦截器
@@ -455,7 +456,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     EventListener.Factory eventListenerFactory;
     ProxySelector proxySelector;
     CookieJar cookieJar;
-    @Nullable Cache cache;
+    @Nullable Cache cache;//缓存配置
     @Nullable InternalCache internalCache;
     SocketFactory socketFactory;
     @Nullable SSLSocketFactory sslSocketFactory;
@@ -464,15 +465,15 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     CertificatePinner certificatePinner;
     Authenticator proxyAuthenticator;
     Authenticator authenticator;
-    ConnectionPool connectionPool;
-    Dns dns;
+    ConnectionPool connectionPool; //实例化连接池
+    Dns dns;//域名解析
     boolean followSslRedirects;
     boolean followRedirects;
     boolean retryOnConnectionFailure;
-    int connectTimeout;
-    int readTimeout;
-    int writeTimeout;
-    int pingInterval;
+    int connectTimeout;//链接超时时间，默认10秒
+    int readTimeout;//读取超时，默认10秒
+    int writeTimeout;//写入超时，默认10秒
+    int pingInterval; //发送ping指令间隔，与WebSocket有关，为了保持长连接-TODO
 
     public Builder() {
       dispatcher = new Dispatcher();

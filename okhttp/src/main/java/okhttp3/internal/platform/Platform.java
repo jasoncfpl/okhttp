@@ -69,6 +69,9 @@ import okio.Buffer;
  * <h3>Android Cleartext Permit Detection</h3>
  *
  * <p>Supported on Android 6.0+ via {@code NetworkSecurityPolicy}.
+ *
+ * 针对不同的平台进行封装，主要做平台的适应性
+ * Platform类主要提供了Android. 2.3+ 到 Android 6.0+的网络请求的适配。
  */
 public class Platform {
   private static final Platform PLATFORM = findPlatform();
